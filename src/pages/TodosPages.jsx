@@ -7,15 +7,23 @@ export default function TodosPage() {
     { id: 2, text: "Купить хлеб" },
     { id: 3, text: "Купить масло" },
   ]);
+
+  const handleDeleteTodo = (id) => {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  };
+
   return (
     <div className="page">
       <h1>Список задач</h1>
       <ul>
         {todos.map((todo) => {
           return (
-            <li className="todo-item" key={todo.id}>
-              {todo.text}
-            </li>
+            <>
+              <li className="todo-item" key={todo.id}>
+                {todo.text}
+              </li>
+              <button onClick={() => handleDeleteTodo(todo.id)}>Удалить</button>
+            </>
           );
         })}
       </ul>
