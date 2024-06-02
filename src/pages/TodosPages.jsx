@@ -3,15 +3,16 @@ import { AddTodoForm } from "../components/AddTodoForm";
 import { getTodos, deleteTodo } from "../api";
 
 export default function TodosPage() {
-  const [todos, setTodos] = useState([
-    // { id: 1, text: "Купить молоко" },
-    // { id: 2, text: "Купить хлеб" },
-    // { id: 3, text: "Купить масло" },
-  ]);
+  const [todos, setTodos] = useState([]);
+  const [deletingTodoIds, setDeletingTodoIds] = useState({});
 
   const handleDeleteTodo = async (id) => {
+    setDeletingTodoIds((prev) => ({ ...prev, [id]: true }));
+
     const newTodo = await deleteTodo(id);
-    setTodos(newTodo.todos)
+
+    setDeletingTodoIds((prev) => ({ ...prev, [id]: false }));
+    setTodos(newTodo.todos);
   };
 
   useEffect(() => {
@@ -26,10 +27,17 @@ export default function TodosPage() {
       <h1>Список задач</h1>
       <ul>
         {todos.map((todo) => {
+          const isDeleting = deletingTodoIds[todo.id];
+
           return (
             <li className="todo-item" key={todo.id}>
               {todo.text}
-              <button onClick={() => handleDeleteTodo(todo.id)}>Удалить</button>
+              <button
+                disabled={isDeleting}
+                onClick={() => handleDeleteTodo(todo.id)}
+              >
+                {isDeleting ? "Удаление..." : "Удалить"}
+              </button>
             </li>
           );
         })}
