@@ -5,26 +5,46 @@ import { getTodos, deleteTodo } from "../api";
 export default function TodosPage() {
   const [todos, setTodos] = useState([]);
   const [deletingTodoIds, setDeletingTodoIds] = useState({});
+  const [getTodosError, setTodosError] = useState(null);
+  const [deleteTodoError, setDeleteTodoError] = useState(null);
 
   const handleDeleteTodo = async (id) => {
     setDeletingTodoIds((prev) => ({ ...prev, [id]: true }));
 
-    const newTodo = await deleteTodo(id);
+    try {
+      const newTodo = await deleteTodo(id);
+      setDeleteTodoError(null);
 
-    setDeletingTodoIds((prev) => ({ ...prev, [id]: false }));
-    setTodos(newTodo.todos);
+      setDeletingTodoIds((prev) => ({ ...prev, [id]: false }));
+      setTodos(newTodo.todos);
+    } catch (error) {
+      if (error.message === "Failed to fetch") {
+        setDeleteTodoError("Ошибка подключения");
+      }
+
+      setDeleteTodoError(error.message);
+    }
   };
 
   useEffect(() => {
-    getTodos().then((result) => {
-      console.log(result.todos);
-      setTodos(result.todos);
-    });
+    getTodos()
+      .then((result) => {
+        setTodosError(null);
+        setTodos(result.todos);
+      })
+      .catch((error) => {
+        if (error.message === "Failed to fetch") {
+          setTodosError("Ошибка подключения");
+        }
+
+        setTodosError(error.message);
+      });
   }, []);
 
   return (
     <div className="page">
       <h1>Список задач</h1>
+      <p style={{ color: "red" }}>{getTodosError}</p>
       <ul>
         {todos.map((todo) => {
           const isDeleting = deletingTodoIds[todo.id];
@@ -38,6 +58,7 @@ export default function TodosPage() {
               >
                 {isDeleting ? "Удаление..." : "Удалить"}
               </button>
+              <p style={{ color: "red" }}>{deleteTodoError}</p>
             </li>
           );
         })}
