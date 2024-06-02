@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { postTodo } from "../api";
 
-export function AddTodoForm({ setTodos, todos }) {
+export function AddTodoForm({ setTodos }) {
   const [newTodoText, setNewTodoText] = useState("");
 
-  const handleAddTodoClick = () => {
+  const handleAddTodoClick = async () => {
     if (!newTodoText) {
       return;
     }
 
-    setTodos([...todos, { id: Date.now(), text: newTodoText }]);
+    const newTodos = await postTodo(newTodoText)
+
+    setTodos(newTodos.todos);
     setNewTodoText("");
   };
 
